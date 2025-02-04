@@ -27,8 +27,8 @@ public class IntoDeepTeleOp extends LinearOpMode {
 
 
        // Hardware
-       DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
-       DcMotor frontRightMotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
+       DcMotor frontLeftMotor = hardwareMap.get(DcMotor.class, "frontRightMotor");
+       DcMotor frontRightMotor = hardwareMap.get(DcMotor.class, "frontLeftMotor");
        DcMotor backLeftMotor = hardwareMap.get(DcMotor.class, "backLeftMotor");
        DcMotor backRightMotor = hardwareMap.get(DcMotor.class, "backRightMotor");
 
