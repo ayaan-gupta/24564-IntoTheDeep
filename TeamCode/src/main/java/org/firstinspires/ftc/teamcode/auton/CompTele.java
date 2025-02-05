@@ -33,7 +33,7 @@ public class CompTele extends LinearOpMode {
 
         // Encoder target positions
         int SLIDE_POSITION_DOWN = 0;    // Change this based on your encoder values
-        int SLIDE_POSITION_UP = 1610;   // Adjust for max height
+        int SLIDE_POSITION_UP = -1610;   // Adjust for max height
         
 
         Servo servo0 = hardwareMap.get(Servo.class, "servo0");
@@ -366,11 +366,11 @@ public class CompTele extends LinearOpMode {
         slideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         if(targetPosition > slideMotor.getCurrentPosition())
         {
-            slideMotor.setPower(.9); // Full power until position is reached
+            slideMotor.setPower(.5); // Full power until position is reached
         }
         else
         {
-            slideMotor.setPower(.8);
+            slideMotor.setPower(.5);
         }
 
     }
