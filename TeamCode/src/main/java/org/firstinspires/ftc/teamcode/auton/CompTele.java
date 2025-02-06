@@ -33,7 +33,7 @@ public class CompTele extends LinearOpMode {
 
         // Encoder target positions
         int SLIDE_POSITION_DOWN = 0;    // Change this based on your encoder values
-        int SLIDE_POSITION_UP = -1610;   // Adjust for max height
+        int SLIDE_POSITION_UP = -1700;   // Adjust for max height
         
 
         Servo servo0 = hardwareMap.get(Servo.class, "servo0");
@@ -70,7 +70,7 @@ public class CompTele extends LinearOpMode {
         boolean bumperPressed = false; // Prevent rapid toggling
 
         // Servo arm positions
-        double servoArmStartPosition = .72;
+        double servoArmStartPosition = .69;
         double servoArmEndPosition = .1;
         boolean isServoArmAtStart = true; // Track if servoArm is at its start position
         armLeft.setPosition(servoArmStartPosition);
