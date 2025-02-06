@@ -56,13 +56,13 @@ public class CompTele extends LinearOpMode {
        
 
         // Known positions for Servo 0
-        double servo0StartPosition = .64; // regular is .68
+        double servo0StartPosition = .68; // regular is .68
         double servo0EndPosition = .29;
         boolean isServo0AtStart = true; // Track if servo0 is at its start position
         servo0.setPosition(servo0StartPosition);
 
         // Known positions for Servo 1 (adjusted for physical direction)
-        double servo1StartPosition = 0.54; //regular is .5
+        double servo1StartPosition = 0.5; //regular is .5
         double servo1EndPosition = .89;   // Matches servo0 end
         boolean isServo1AtStart = true; // Track if servo1 is at its start position
         servo1.setPosition(servo1StartPosition);
@@ -83,9 +83,9 @@ public class CompTele extends LinearOpMode {
         armClaw.setPosition(armClawEndPosition);
         
         // Servo claw positions
-        double intakeStart = .28;
+        double intakeStart = .26;
         double intakeMid = .21;
-        double intakeEnd = .15;
+        double intakeEnd = .14;
         boolean intakeAtStart = true; // Track if servoArm is at its start position
         boolean intakeAtMid = true; // Track if servoArm is at its start position
         intakeLeft.setPosition(intakeStart);
@@ -97,9 +97,9 @@ public class CompTele extends LinearOpMode {
         boolean intakeTurnAtMid = true; // Track if servoArm is at its start position
         intakeRight.setPosition(intakeTurnStart);
         
-        double intakeSwivelStart = .77;
-        double intakeSwivelMid = .597;
-        double intakeSwivelEnd = .425;
+        double intakeSwivelStart = .55;
+        double intakeSwivelMid = .397;
+        double intakeSwivelEnd = .225;
         boolean isIntakeSwivelAtStart = true; // Track if servoArm is at its start position
         intakeSwivel.setPosition(intakeSwivelStart);
         
@@ -366,11 +366,11 @@ public class CompTele extends LinearOpMode {
         slideMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         if(targetPosition > slideMotor.getCurrentPosition())
         {
-            slideMotor.setPower(.5); // Full power until position is reached
+            slideMotor.setPower(1); // Full power until position is reached
         }
         else
         {
-            slideMotor.setPower(.5);
+            slideMotor.setPower(1);
         }
 
     }
