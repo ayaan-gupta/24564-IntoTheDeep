@@ -78,7 +78,7 @@ public class CompTele extends LinearOpMode {
         
         // Servo claw positions
         double armClawStartPosition = .96;
-        double armClawEndPosition = .62;
+        double armClawEndPosition = .67;
         boolean isArmClawAtStart = false; // Track if servoArm is at its start position
         armClaw.setPosition(armClawEndPosition);
         

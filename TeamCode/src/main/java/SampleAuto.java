@@ -19,10 +19,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @Config
-@Autonomous(name = "SPEC_AUTO", group = "Autonomous")
-public class SpecAuto extends LinearOpMode {
-    public static int liftScorePos  = -290;
-    public static double armDepositPos = .10;
+@Autonomous(name = "SAMPLE_AUTO", group = "Autonomous")
+public class SampleAuto extends LinearOpMode {
+    public static int liftScorePos  = -590;
+    public static double armDepositPos = .15;
     public class Lift {
         private DcMotor lift;
         public int endPos = liftScorePos;
@@ -159,49 +159,38 @@ public class SpecAuto extends LinearOpMode {
 //        int visionOutputPosition = 1;
 
         TrajectoryActionBuilder auto = drive.actionBuilder(initialPose)
-//                .lineToConstantHeading(new Vector2d(9, -34))
-                .afterTime(.05, arm.depositArm())
-                .afterTime(.05, lift.up())
-                .afterTime(1.45, arm.scoreArm())
-                .lineToY(-25)
-                .waitSeconds(4.5)  // remove
-                .setTangent(Math.toRadians(270))
-                .splineToLinearHeading(new Pose2d(38, -34, Math.toRadians(90)), Math.toRadians(90))
                 .setTangent(Math.toRadians(90))
-                .lineToY(-16)
-//                .lineToConstantHeading(new Vector2d(38, -16))
-                .splineToConstantHeading(new Vector2d(48, -16), Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(48, -56), Math.toRadians(270))
-                .lineToY(-16)
-
-//                .lineToConstantHeading(new Vector2d(48, -16))
-                .splineToConstantHeading(new Vector2d(59, -16), Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(59, -56), Math.toRadians(270))
-                .waitSeconds(.25)
-                .setTangent(180)
-                .splineToConstantHeading(new Vector2d(38, -62), Math.toRadians(270))
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(6, -34, Math.toRadians(270)), Math.toRadians(90))
-                .setTangent(Math.toRadians(270))
-                .splineToLinearHeading(new Pose2d(38, -62, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(.25)
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(3, -34, Math.toRadians(270)), Math.toRadians(90))
-                .setTangent(Math.toRadians(270))
-                .splineToLinearHeading(new Pose2d(38, -62, Math.toRadians(90)), Math.toRadians(270))
-                .waitSeconds(.25)
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(0, -34, Math.toRadians(270)), Math.toRadians(90));
-                //.setTangent(Math.toRadians(270));
+                        .splineToLinearHeading(new Pose2d(-54, -54, Math.toRadians(45)), Math.toRadians(225));
+//                        .turn(Math.toRadians(35))
+//                        .turn(Math.toRadians(-35))
+//                        .turn(Math.toRadians(55))
+//                        .turn(Math.toRadians(-55))
+//                        .turn(Math.toRadians(75))
+//                        .turn(Math.toRadians(-75));
+        TrajectoryActionBuilder auto2 = drive.actionBuilder(initialPose)
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(-54, -54, Math.toRadians(45)), Math.toRadians(225))
+                .turn(Math.toRadians(35))
+                .turn(Math.toRadians(-35))
+                .turn(Math.toRadians(55))
+                .turn(Math.toRadians(-55))
+                .turn(Math.toRadians(75))
+                .turn(Math.toRadians(-75));
 
 
         waitForStart();
 
         if (isStopRequested()) return;
 
+        Action traj1 = auto.build();
+
         Actions.runBlocking(
                 new SequentialAction(
-                        auto.build()
+                        traj1,
+                        lift.up(),
+                        arm.depositArm(),
+                        claw.openClaw()
+
                 )
         );
     }
