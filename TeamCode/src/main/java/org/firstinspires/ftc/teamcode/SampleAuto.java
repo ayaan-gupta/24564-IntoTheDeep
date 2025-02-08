@@ -4,8 +4,10 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -18,10 +20,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 @Autonomous(name = "SAMPLE_AUTO", group = "Autonomous")
 public class SampleAuto extends LinearOpMode {
-    public static int liftScorePos  = -590;
-    public static double armTransferPos = .69;
-    public static double armDepositPos = .15;
-    public static double extensionVal = .18;
+    public static int liftScorePos  = -1590;
+    public static double armTransferPos = .64;
+    public static double armDepositPos = .08;
+    public static double extensionVal = .35;
     public class Lift {
         private DcMotor lift;
         public int endPos = liftScorePos;
@@ -39,7 +41,7 @@ public class SampleAuto extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 lift.setTargetPosition(endPos);
                 lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lift.setPower(.5);
+                lift.setPower(1);
                 return false;
             }
         }
@@ -53,7 +55,8 @@ public class SampleAuto extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 lift.setTargetPosition(0);
                 lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                lift.setPower(.5);
+                lift.setPower(1);
+
                 return false;
             }
         }
@@ -73,6 +76,9 @@ public class SampleAuto extends LinearOpMode {
         public OuttakeArm(HardwareMap hardwareMap) {
             right = hardwareMap.get(Servo.class, "armRight");
             left = hardwareMap.get(Servo.class, "armLeft");
+
+            left.setPosition(armTransfer);
+            right.setPosition(1 - armTransfer);
         }
 
         public class TransferArm implements Action {
@@ -103,7 +109,7 @@ public class SampleAuto extends LinearOpMode {
     public class Claw {
         private Servo claw;
         double clawOpen = .96;
-        double clawClosed = .66;
+        double clawClosed = .59;
 
         public Claw(HardwareMap hardwareMap) {
             claw = hardwareMap.get(Servo.class, "armClaw");
@@ -239,6 +245,19 @@ public class SampleAuto extends LinearOpMode {
         public Action retract() {
             return new Retract();
         }
+
+        public class Dodge implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                right.setPosition(.62);
+                left.setPosition(.56);
+                return false;
+            }
+        }
+
+        public Action dodge() {
+            return new Dodge();
+        }
     }
 
     @Override
@@ -254,15 +273,37 @@ public class SampleAuto extends LinearOpMode {
 
 //        int visionOutputPosition = 1;
 
+        Action slidesDown = new SequentialAction(
+                extension.dodge(),
+                lift.down(),
+                new SleepAction(100),
+                extension.retract()
+        );
+
+        Action intakeAction = new SequentialAction(
+                extension.extend(),
+                intake.intake()
+
+        );
+
+        Action intakeRetract = new ParallelAction(
+                extension.retract(),
+                intake.transfer()
+        );
+
         TrajectoryActionBuilder auto = drive.actionBuilder(initialPose)
                 .setTangent(Math.toRadians(90))
-                        .splineToLinearHeading(new Pose2d(-54, -54, Math.toRadians(45)), Math.toRadians(225));
-//                        .turn(Math.toRadians(35))
-//                        .turn(Math.toRadians(-35))
-//                        .turn(Math.toRadians(55))
-//                        .turn(Math.toRadians(-55))
-//                        .turn(Math.toRadians(75))
-//                        .turn(Math.toRadians(-75));
+                .splineToLinearHeading(new Pose2d(-56, -56, Math.toRadians(45)), Math.toRadians(225))
+                .afterTime(0, lift.up())
+                .afterTime(1, arm.depositArm())
+                .afterTime(2, claw.openClaw())
+                .afterTime(2.15, arm.transferArm())
+                .afterTime(2.5, slidesDown)
+                .waitSeconds(5)
+                .turnTo(Math.toRadians(80))
+                .afterTime(.25, intakeAction)
+                .afterTime(.75, intakeRetract);
+
         TrajectoryActionBuilder auto2 = drive.actionBuilder(initialPose)
 //                .setTangent(Math.toRadians(90))
 //                .splineToLinearHeading(new Pose2d(-54, -54, Math.toRadians(45)), Math.toRadians(225))
@@ -282,13 +323,11 @@ public class SampleAuto extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        traj1,
-                        lift.up(),
-                        arm.depositArm(),
-                        claw.openClaw()
-
+                        traj1
                 )
         );
+
+
     }
 
 }
