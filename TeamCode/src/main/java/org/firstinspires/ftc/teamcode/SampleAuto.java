@@ -21,9 +21,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Autonomous(name = "SAMPLE_AUTO", group = "Autonomous")
 public class SampleAuto extends LinearOpMode {
     public static int liftScorePos  = -1590;
-    public static double armTransferPos = .64;
-    public static double armDepositPos = .08;
-    public static double extensionVal = .35;
+    public static double armTransferPos = .705;
+    public static double armDepositPos = .06;
+    public static double extensionVal = .30;
     public class Lift {
         private DcMotor lift;
         public int endPos = liftScorePos;
@@ -143,21 +143,21 @@ public class SampleAuto extends LinearOpMode {
         private Servo intakeTurn;
         private Servo swivel;
         private Servo claw;
-        double intakeStart = .26;
-        double intakeEnd = .14;
+        double intakeStart = .24;
+        double intakeEnd = .01;
 
         // Servo claw positions
-        double intakeTurnStart = .02;
+        double intakeTurnStart = 0;
         double intakeTurnEnd = 1;
 
 
         double swivelStart = .55;
-        double swivelMid = .397;
+        double swivelMid = .517;
         double swivelEnd = .225;
 
         // Servo claw positions
-        double clawOpen = 0;
-        double clawClosed = .4;
+        double clawOpen = .48;
+        double clawClosed = 1;
 
         public IntakeMech(HardwareMap hardwareMap) {
             intake = hardwareMap.get(Servo.class, "intakeLeft");
@@ -176,7 +176,7 @@ public class SampleAuto extends LinearOpMode {
             public boolean run(@NonNull TelemetryPacket packet) {
                 intake.setPosition(intakeEnd);
                 intakeTurn.setPosition(intakeTurnEnd);
-                sleep(10);
+                sleep(1500);
                 claw.setPosition(clawClosed);
                 return false;
             }
@@ -198,6 +198,55 @@ public class SampleAuto extends LinearOpMode {
 
         public Action transfer() {
             return new Transfer();
+        }
+
+        public class OpenIntakeClaw implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                claw.setPosition(clawOpen);
+                return false;
+            }
+        }
+
+        public Action openIntakeClaw() {
+            return new OpenIntakeClaw();
+        }
+
+        public class SwivelRight implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                swivel.setPosition(swivelMid);
+                return false;
+            }
+        }
+
+        public Action swivelRight() {
+            return new SwivelRight();
+        }
+
+        public class SwivelReg implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                swivel.setPosition(swivelStart);
+                return false;
+            }
+        }
+
+        public Action swivelReg() {
+            return new SwivelReg();
+        }
+
+        public class EndPos implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                intake.setPosition(intakeStart + .06);
+                intakeTurn.setPosition(intakeTurnStart);
+                return false;
+            }
+        }
+
+        public Action endPos() {
+            return new EndPos();
         }
     }
     public class Extension {
@@ -233,6 +282,32 @@ public class SampleAuto extends LinearOpMode {
             return new Extend();
         }
 
+        public class ExtendLong implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                right.setPosition(rightStart - (ext + .02));
+                left.setPosition(leftStart + (ext + .02));
+                return false;
+            }
+        }
+
+        public Action extendLong() {
+            return new ExtendLong();
+        }
+
+        public class ExtendShort implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                right.setPosition(rightStart - (ext - .01));
+                left.setPosition(leftStart + (ext - .01));
+                return false;
+            }
+        }
+
+        public Action extendShort() {
+            return new ExtendShort();
+        }
+
         public class Retract implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -249,8 +324,8 @@ public class SampleAuto extends LinearOpMode {
         public class Dodge implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                right.setPosition(.62);
-                left.setPosition(.56);
+                right.setPosition(.59);
+                left.setPosition(.59);
                 return false;
             }
         }
@@ -276,19 +351,39 @@ public class SampleAuto extends LinearOpMode {
         Action slidesDown = new SequentialAction(
                 extension.dodge(),
                 lift.down(),
-                new SleepAction(100),
+                new SleepAction(1.15),
                 extension.retract()
         );
 
         Action intakeAction = new SequentialAction(
                 extension.extend(),
                 intake.intake()
-
         );
+
+        Action intakeActionShort = new SequentialAction(
+                extension.extendShort(),
+                new SleepAction(.05),
+                intake.intake()
+        );
+
+        Action intakeActionWSwivel = new SequentialAction(
+                extension.extendLong(),
+                new SleepAction(.6),
+                intake.swivelRight(),
+                intake.intake(),
+                new SleepAction(1.25)
+        );
+
 
         Action intakeRetract = new ParallelAction(
                 extension.retract(),
                 intake.transfer()
+        );
+
+        Action transferSample = new SequentialAction(
+                claw.closeClaw(),
+                new SleepAction(.1),
+                intake.openIntakeClaw()
         );
 
         TrajectoryActionBuilder auto = drive.actionBuilder(initialPose)
@@ -299,20 +394,54 @@ public class SampleAuto extends LinearOpMode {
                 .afterTime(2, claw.openClaw())
                 .afterTime(2.15, arm.transferArm())
                 .afterTime(2.5, slidesDown)
-                .waitSeconds(5)
-                .turnTo(Math.toRadians(80))
-                .afterTime(.25, intakeAction)
-                .afterTime(.75, intakeRetract);
-
-        TrajectoryActionBuilder auto2 = drive.actionBuilder(initialPose)
-//                .setTangent(Math.toRadians(90))
-//                .splineToLinearHeading(new Pose2d(-54, -54, Math.toRadians(45)), Math.toRadians(225))
-                .turn(Math.toRadians(35))
-                .turn(Math.toRadians(-35))
-                .turn(Math.toRadians(55))
-                .turn(Math.toRadians(-55))
-                .turn(Math.toRadians(75))
-                .turn(Math.toRadians(-75));
+                .waitSeconds(2.5)
+                .turnTo(Math.toRadians(85))
+                .afterTime(.25, intakeActionShort)
+                .afterTime(1.65, intakeRetract)
+                .afterTime(3.15, claw.closeClaw())
+                .afterTime(3.25, intake.openIntakeClaw())
+                .waitSeconds(3.25)
+                .turnTo(Math.toRadians(45))
+                .afterTime(0, lift.up())
+                .afterTime(1, arm.depositArm())
+                .afterTime(2, claw.openClaw())
+                .afterTime(2.15, arm.transferArm())
+                .afterTime(2.5, extension.dodge())
+                .afterTime(2.5, slidesDown)
+                .waitSeconds(2.5)
+                .turnTo(Math.toRadians(105.5))
+                .afterTime(.25, intakeActionShort)
+                .afterTime(1.55, extension.retract())
+                .afterTime(1.65, intake.transfer())
+                .afterTime(3.05, claw.closeClaw())
+                .afterTime(3.15, intake.openIntakeClaw())
+//                .afterTime(3.05, transferSample)
+                .waitSeconds(3.15)
+                .turnTo(Math.toRadians(45))
+                .afterTime(0, lift.up())
+                .afterTime(1, arm.depositArm())
+                .afterTime(2, claw.openClaw())
+                .afterTime(2.15, arm.transferArm())
+                .afterTime(2.5, extension.dodge())
+                .afterTime(2.5, slidesDown)
+                .waitSeconds(2.5)
+                .turnTo(Math.toRadians(122.5))
+                .afterTime(.25, intakeActionWSwivel)
+                .afterTime(1.05, intake.swivelReg())
+                .afterTime(1.25, extension.retract())
+                .afterTime(1.95, intake.transfer())
+                .afterTime(3.25, claw.closeClaw())
+                .afterTime(3.35, intake.openIntakeClaw())
+                .waitSeconds(3.25)
+                .turnTo(Math.toRadians(45))
+                .afterTime(0, lift.up())
+                .afterTime(1, arm.depositArm())
+                .afterTime(2, claw.openClaw())
+                .afterTime(2.15, arm.transferArm())
+                .afterTime(2.5, extension.dodge())
+                .afterTime(2.5, slidesDown)
+                .afterTime(2.5, intake.endPos())
+                .waitSeconds(4);
 
 
         waitForStart();
