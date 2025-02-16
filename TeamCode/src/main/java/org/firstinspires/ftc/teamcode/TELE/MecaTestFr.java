@@ -12,9 +12,10 @@ public class MecaTestFr extends LinearOpMode {
     public static double servo0val = .06;
     public static double servo1Val = .74;
     public static double intakeS = .5;
-    public static double intakeE = .65;
+    public static double intakeE = .64;
     public static double intakeTurnS = 1;
     public static double intakeTurnE = .1;
+    public static double armVal = .74;
 
 
     @Override
@@ -46,17 +47,17 @@ public class MecaTestFr extends LinearOpMode {
         boolean bumperPressed = false; // Prevent rapid toggling
 
         // Servo arm positions
-        double servoArmStartPosition = .2;
+        double servoArmStartPosition = armVal;
         double servoArmEndPosition = 0;
         boolean isServoArmAtStart = true; // Track if servoArm is at its start position
         armLeft.setPosition(servoArmStartPosition);
         armRight.setPosition(1 - servoArmStartPosition);
 //
 //        // Servo claw positions
-//        double armClawStartPosition = .96;
-//        double armClawEndPosition = .59;
-//        boolean isArmClawAtStart = false; // Track if servoArm is at its start position
-//        armClaw.setPosition(armClawStartPosition);
+        double armClawStartPosition = .65;
+        double armClawEndPosition = .22;
+        boolean isArmClawAtStart = false; // Track if servoArm is at its start position
+        armClaw.setPosition(armClawStartPosition);
 //
 //        // Servo claw positions
         double intakeStart = intakeS;
@@ -73,19 +74,18 @@ public class MecaTestFr extends LinearOpMode {
         boolean intakeTurnAtMid = true; // Track if servoArm is at its start position
         intakeRight.setPosition(intakeTurnStart);
 //
-//        double intakeSwivelStart = .55;
-//        double intakeSwivelRight = .397;
-//        double intakeSwivelLeft = .703;
-//        double intakeSwivelEnd = .225;
-//        boolean isIntakeSwivelAtStart = true; // Track if servoArm is at its start position
-//        intakeSwivel.setPosition(intakeSwivelStart);
+        double intakeSwivelStart = .51;
+        double intakeSwivelRight = .397;
+        double intakeSwivelLeft = .703;
+        double intakeSwivelEnd = .225;
+        boolean isIntakeSwivelAtStart = true; // Track if servoArm is at its start position
+        intakeSwivel.setPosition(intakeSwivelStart);
 //
 //        // Servo claw positions
-//        double intakeClawStartPosition = .53;
-//        double intakeClawEndPosition = .1;
-//
-//        boolean isIntakeClawAtStart = true; // Track if servoArm is at its start position
-//        intakeClaw.setPosition(intakeClawStartPosition);
+        double intakeClawStartPosition = .35;
+        double intakeClawEndPosition = .05;
+        boolean isIntakeClawAtStart = true; // Track if servoArm is at its start position
+        intakeClaw.setPosition(intakeClawStartPosition);
 
         boolean leftBumperPressed = false;
         boolean aPressed = false;
@@ -153,6 +153,81 @@ public class MecaTestFr extends LinearOpMode {
 
             if (!gamepad1.y) {
                 yPressed = false;
+            }
+
+            if (gamepad1.x) {
+                intakeLeft.setPosition(.72);
+                sleep(75);
+                intakeClaw.setPosition(intakeClawEndPosition);
+                intakeLeft.setPosition(intakeEnd);
+                intakeSwivel.setPosition(intakeSwivelStart);
+            }
+
+            if (gamepad1.b && !bPressed && intakeAtStart && isServoArmAtStart) {
+                if(!isArmClawAtStart){
+                    armClaw.setPosition(armClawStartPosition);
+                    isArmClawAtStart = true;
+                }
+                armClaw.setPosition(armClawEndPosition);
+                sleep(100);
+                intakeClaw.setPosition(intakeClawStartPosition);
+
+
+
+                isIntakeClawAtStart = true;
+
+                armLeft.setPosition(servoArmEndPosition);
+                armRight.setPosition(1 - servoArmEndPosition);
+                isServoArmAtStart = false;
+                bPressed = true;
+            }
+
+            if (!gamepad1.b) {
+                bPressed = false;
+            }
+
+            if (gamepad1.dpad_right && !dpadRightPressed) {
+                intakeSwivel.setPosition(intakeSwivelRight);
+
+                isIntakeSwivelAtStart = false; // Toggle the state
+                dpadRightPressed = true;
+            }
+
+            if (!gamepad1.dpad_right) {
+                dpadRightPressed = false;
+            }
+
+            if (gamepad1.dpad_left && !dpadLeftPressed) {
+                intakeSwivel.setPosition(intakeSwivelLeft);
+
+                isIntakeSwivelAtStart = false; // Toggle the state
+                dpadLeftPressed = true;
+            }
+
+            if (!gamepad1.dpad_left) {
+                dpadLeftPressed = false;
+            }
+
+            if (gamepad1.dpad_down && !dpadDownPressed) {
+                intakeSwivel.setPosition(intakeSwivelEnd);
+
+                isIntakeSwivelAtStart = false; // Toggle the state
+                dpadDownPressed = true;
+            }
+
+            if (!gamepad1.dpad_down) {
+                dpadDownPressed = false;
+            }
+
+            if (gamepad1.dpad_up && !dpadUpPressed) {
+                intakeSwivel.setPosition(intakeSwivelStart);
+
+                isIntakeSwivelAtStart = false; // Toggle the state
+                dpadUpPressed = true;
+            }
+
+            if (!gamepad1.dpad_up) {
+                dpadUpPressed = false;
             }
 
         }

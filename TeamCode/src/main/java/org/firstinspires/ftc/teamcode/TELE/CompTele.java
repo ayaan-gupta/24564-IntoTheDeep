@@ -343,7 +343,7 @@ public class CompTele extends LinearOpMode {
                 xPressed = true;
             }
 
-            if (!gamepad1.x) {
+            if (!gamepad2.x) {
                 xPressed = false;
             }
             
