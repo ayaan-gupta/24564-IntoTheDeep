@@ -12,11 +12,11 @@ public class CompTele extends LinearOpMode {
 
     public static double servo0val = 0;
     public static double servo1Val = 1;
-    public static double intakeS = .48;
-    public static double intakeE = .30;
-    public static double intakeTurnS = 1;
-    public static double intakeTurnE = 0;
-    public static double armVal = .76;
+    public static double intakeS = .51;
+    public static double intakeE = .44;
+    public static double intakeTurnS =0;
+    public static double intakeTurnE = 1;
+    public static double armVal = .77;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -64,13 +64,13 @@ public class CompTele extends LinearOpMode {
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         double servo0StartPosition = servo0val; // regular is .68
-        double servo0EndPosition = .6; //.29
+        double servo0EndPosition = .5; //.29
         boolean isServo0AtStart = true; // Track if servo0 is at its start position
         servo0.setPosition(servo0StartPosition);
 
         // Known positions for Servo 1 (adjusted for physical direction)
         double servo1StartPosition = servo1Val; //regular is .5
-        double servo1EndPosition = .4;   // .89
+        double servo1EndPosition = .5;   // .89
         boolean isServo1AtStart = true; // Track if servo1 is at its start position
         servo1.setPosition(servo1StartPosition);
 
@@ -78,7 +78,7 @@ public class CompTele extends LinearOpMode {
 
         // Servo arm positions
         double servoArmStartPosition = armVal;
-        double servoArmEndPosition = .2;
+        double servoArmEndPosition = .14;
         boolean isServoArmAtStart = true; // Track if servoArm is at its start position
         armLeft.setPosition(servoArmStartPosition);
         armRight.setPosition(1 - servoArmStartPosition);
@@ -91,7 +91,7 @@ public class CompTele extends LinearOpMode {
 //
 //        // Servo claw positions
         double intakeStart = intakeS;
-        double intakePast = intakeE - .12;
+        double intakePast = intakeE - .09;
         double intakeEnd = intakeE;
         boolean intakeAtStart = true; // Track if servoArm is at its start position
         boolean intakeAtMid = true; // Track if servoArm is at its start position
@@ -101,19 +101,19 @@ public class CompTele extends LinearOpMode {
         double intakeTurnStart = intakeTurnS;
         double intakeTurnEnd = intakeTurnE;
         boolean intakeTurnAtStart = true; // Track if servoArm is at its start position
-        boolean intakeTurnAtMid = true; // Track if servoArm is at its start position
+        boolean intakeTurnAtPast = false; // Track if servoArm is at its start position
         intakeRight.setPosition(intakeTurnStart);
 //
-        double intakeSwivelStart = .51;
-        double intakeSwivelRight = .397;
-        double intakeSwivelLeft = .703;
-        double intakeSwivelEnd = .225;
+        double intakeSwivelStart = .35;
+        double intakeSwivelRight = .237;
+        double intakeSwivelLeft = .463;
+        double intakeSwivelEnd = .065;
         boolean isIntakeSwivelAtStart = true; // Track if servoArm is at its start position
         intakeSwivel.setPosition(intakeSwivelStart);
 //
 //        // Servo claw positions
-        double intakeClawStartPosition = .35;
-        double intakeClawEndPosition = .05;
+        double intakeClawStartPosition = .45;
+        double intakeClawEndPosition = .15;
         boolean isIntakeClawAtStart = true; // Track if servoArm is at its start position
         intakeClaw.setPosition(intakeClawStartPosition);
 
@@ -139,8 +139,11 @@ public class CompTele extends LinearOpMode {
             
             if (gamepad2.a) {
                 moveSlideToPosition(SLIDE_POSITION_DOWN, slideMotor);
-                servo0.setPosition(.10);
-                servo1.setPosition(.64);
+                if(slideMotor.getCurrentPosition() != 0 && slideMotor.getCurrentPosition() <= -100){
+                    servo0.setPosition(servo0StartPosition+.15);
+                    servo1.setPosition(servo1StartPosition-.15);
+                }
+
                 if(slideMotor.getCurrentPosition() > -100) {
                     servo0.setPosition(servo0StartPosition);
                     servo1.setPosition(servo1StartPosition);
@@ -157,6 +160,7 @@ public class CompTele extends LinearOpMode {
                 slideMotor.setPower(1); // Small holding power to maintain position
             }
 
+            telemetry.addData("slidesMotor pos", slideMotor.getCurrentPosition());
             
             double y = -gamepad1.left_stick_y * .8;
             double x = -gamepad1.right_stick_x * .8;
@@ -185,18 +189,13 @@ public class CompTele extends LinearOpMode {
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
 
-            if (gamepad1.x && !xPressed) {
-                intakeLeft.setPosition(intakePast);
-                sleep(500);
-//                intakeClaw.setPosition(intakeClawEndPosition);
-//                sleep(100);
+
+
+            if (gamepad1.b && !bPressed) {
                 intakeLeft.setPosition(intakeEnd);
                 intakeSwivel.setPosition(intakeSwivelStart);
             }
 
-            if(!gamepad1.x) {
-                xPressed = false;
-            }
 
             // Toggle Servo 0 and Servo 1 positions with the right bumper
             if (gamepad1.right_bumper && !bumperPressed) {
@@ -275,7 +274,6 @@ public class CompTele extends LinearOpMode {
                 dpadUpPressed = false;
             }
 
-            telemetry.addData("Front Left Power", frontLeftPower);
 
 
 
@@ -293,7 +291,6 @@ public class CompTele extends LinearOpMode {
                 leftBumperPressed = true;
             }
 
-            telemetry.addData("Back Left Power", backLeftPower);
             
             if (!gamepad1.left_bumper) {
                 leftBumperPressed = false;
@@ -318,9 +315,11 @@ public class CompTele extends LinearOpMode {
                 if (intakeAtStart) {
                     intakeLeft.setPosition(intakeEnd);
                     intakeRight.setPosition(intakeTurnEnd);
+                    telemetry.addData("intake start", "True");
                 } else {
                     intakeLeft.setPosition(intakeStart);
                     intakeRight.setPosition(intakeTurnStart);
+                    telemetry.addData("intake start", "false");
                 }
                 intakeAtStart = !intakeAtStart;
                 intakeTurnAtStart = !intakeTurnAtStart;
@@ -331,6 +330,34 @@ public class CompTele extends LinearOpMode {
                 yPressed = false;
             }
 
+            if (gamepad1.x) {
+                intakeLeft.setPosition(intakeEnd-.13);
+                sleep(75);
+                intakeClaw.setPosition(intakeClawEndPosition);
+                intakeLeft.setPosition(intakeEnd);
+                intakeSwivel.setPosition(intakeSwivelStart);
+//                if(!intakeAtStart) {
+//                    if(!intakeTurnAtPast) {
+//                        intakeLeft.setPosition(intakePast);
+//                        telemetry.addData("intake past", "True");
+//                    }
+//                    else {
+//                        intakeLeft.setPosition(intakeEnd + .03);
+//                        telemetry.addData("intake past", "false");
+//                    }
+//                    intakeTurnAtPast = !intakeTurnAtPast;
+//                    xPressed = true;
+//                }
+            }
+
+            if (gamepad1.x) {
+                telemetry.addData("X Pressed", "True");
+            }
+
+//            if(!gamepad1.x) {
+//                xPressed = false;
+//            }
+
             telemetry.addData("intake at start", intakeAtStart);
             telemetry.addData("y pressed", yPressed);
 
@@ -339,10 +366,12 @@ public class CompTele extends LinearOpMode {
                     armClaw.setPosition(armClawStartPosition);
                     isArmClawAtStart = true;
                 }
+                intakeLeft.setPosition(intakeStart+.04);
+                sleep(75);
                 armClaw.setPosition(armClawEndPosition);
-                sleep(100);
+                sleep(250);
                 intakeClaw.setPosition(intakeClawStartPosition);
-                
+                intakeLeft.setPosition(intakeStart);
 
 
                 isIntakeClawAtStart = true;
@@ -356,9 +385,7 @@ public class CompTele extends LinearOpMode {
             if (!gamepad2.x) {
                 xPressed = false;
             }
-            
-            telemetry.addData("Front Right Power", frontRightPower);
-            telemetry.addData("Back Right Power", backRightPower);
+
             
             if (gamepad2.right_bumper && !rightBumper2Pressed) {
                 if (isArmClawAtStart) {
@@ -393,11 +420,7 @@ public class CompTele extends LinearOpMode {
             // Telemetry for debugging
             
             
-            
-            telemetry.addData("Servo 0 Position", servo0.getPosition());
-            telemetry.addData("front right", frontRightMotor.getCurrentPosition());
-            telemetry.addData("Swivel Position", intakeSwivel.getPosition());
-            telemetry.addData("Servo Arm State", isServoArmAtStart ? "Start" : "End");
+
             telemetry.update();
             
         }
